@@ -25,29 +25,30 @@ def get_stock_data(datas):
         file_path = os.path.join('./dataset/Stocks', file_name)
         if os.path.exists(file_path):
             stock_data = pd.read_csv(file_path)
-            scaler = MinMaxScaler()        
+            scaler = MinMaxScaler()
             stock_data['Open'] = scaler.fit_transform(stock_data[['Open']])
             stock_datas[file_name.replace('.us.txt', '')] = stock_data['Open']
         else:
             print(f"File {file_name} not found.")
     return stock_datas
 
-hedge_stock_loss_file = "./dataset/hedge_stock_loss.csv"
+def analyze(corr_threshold=0.9, long_stocks=10, short_stocks=10):
+    hedge_stock_loss_file = "./dataset/hedge_stock_loss.csv"
 
-df = pd.read_csv(hedge_stock_loss_file)
-long_stocks = 10
-short_stocks = 10
+    df = pd.read_csv(hedge_stock_loss_file)
 
-low_n_rows = get_top_n_rows(df, long_stocks, True)
-top_n_rows = get_top_n_rows(df, short_stocks, False)
+    low_n_rows = get_top_n_rows(df, long_stocks, True)
+    top_n_rows = get_top_n_rows(df, short_stocks, False)
 
-long_df = pd.DataFrame(get_stock_data(low_n_rows)).dropna()
-hedge_df = pd.DataFrame(get_stock_data(top_n_rows)).dropna()
+    long_df = pd.DataFrame(get_stock_data(low_n_rows)).dropna()
+    hedge_df = pd.DataFrame(get_stock_data(top_n_rows)).dropna()
 
-long_corr_mat = long_df.corr()
-hedge_corr_mat = hedge_df.corr()
-
-print("SPY, QQQ와 같이 우상향하는 주식")
-print(over_n_corr(long_corr_mat, 0.85))
-print("지수와의 상관 관계가 약한 주식")
-print(over_n_corr(hedge_corr_mat, 0.85))
+    long_corr_mat = long_df.corr()
+    hedge_corr_mat = hedge_df.corr()
+    '''
+    print("SPY, QQQ와 같이 우상향하는 주식")
+    print(over_n_corr(long_corr_mat, corr_threshold))
+    print("지수와의 상관 관계가 약한 주식")
+    print(over_n_corr(hedge_corr_mat, corr_threshold))
+    '''
+    return over_n_corr(long_corr_mat, corr_threshold), over_n_corr(hedge_corr_mat, corr_threshold) 

@@ -1,0 +1,42 @@
+digraph stock_trading_process {
+    rankdir=TB; // 나열 방향 (위에서 아래로)
+
+    subgraph cluster_step1 {
+        label="Step 1: Input to Deep Learning Model";
+        input [shape=box, label="NYSE Stock Data\n+ Index Data"];
+        output [shape=box, label="Error Scores for Each Stock"];
+        input -> output [label="Deep Learning Model"];
+    }
+
+    subgraph cluster_step2 {
+        label="Step 2: Buy Decision";
+        decision [shape=diamond, label="Error Scores\nvs\nThreshold"];
+        buy [shape=box, label="Buy Stocks"];
+        no_buy [shape=box, label="Do Not Buy"];
+        target [shape=box, label="Target Portfolio\nAchieved"];
+        decision -> {buy, no_buy};
+        decision -> target [label="Achieved"];
+    }
+
+    subgraph cluster_step3 {
+        label="Step 3: Buy Correlated Stocks";
+        correlate [shape=box, label="Identify\nHigh Correlation"];
+        buy_correlated [shape=box, label="Buy Correlated Stocks"];
+        correlate -> buy_correlated;
+    }
+
+    subgraph cluster_step4 {
+        label="Step 4: Monitor and Repeat";
+        monitor [shape=box, label="Monitor Stocks\nand Portfolio"];
+        repeat [shape=box, label="Repeat Steps 1-4"];
+        sell [shape=box, label="Sell Stocks"];
+        monitor -> {repeat, sell};
+    }
+
+    // Connect Steps
+    output -> decision;
+    buy -> correlate [label="Low Stocks Count"];
+    no_buy -> correlate [label="High Stocks Count"];
+    buy_correlated -> monitor;
+    sell -> repeat;
+}
